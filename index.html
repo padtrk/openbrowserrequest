@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>London Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 24px; background: #fafafa; }
+    h1 { margin-bottom: 8px; }
+    .sub { color: #666; margin-bottom: 24px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+    .card { background: white; border: 1px solid #ddd; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .label { font-size: 12px; text-transform: uppercase; color: #777; margin-bottom: 8px; }
+    .value { font-size: 28px; font-weight: bold; }
+    .small { margin-top: 6px; color: #666; }
+  </style>
+</head>
+<body>
+  <h1>London Dashboard</h1>
+  <div class="sub">Live London data + official statistics for static hosting</div>
+
+  <div class="grid">
+    <div class="card" id="population-card">
+      <div class="label">Official stat</div>
+      <div class="value">8.95m</div>
+      <div class="small">London population</div>
+    </div>
+
+    <div class="card" id="crime-card">
+      <div class="label">Live</div>
+      <div class="value">Loading…</div>
+      <div class="small">Crime near Westminster</div>
+    </div>
+
+    <div class="card" id="postcode-card">
+      <div class="label">Live</div>
+      <div class="value">Loading…</div>
+      <div class="small">Postcode lookup</div>
+    </div>
+
+    <div class="card" id="holiday-card">
+      <div class="label">Live</div>
+      <div class="value">Loading…</div>
+      <div class="small">Next bank holiday</div>
+    </div>
+  </div>
+
+  <script>
+    async function loadDashboard() {
+      try {
+        const police = await fetch('https://data.police.uk/api/crimes-street/all-crime?lat=51.5072&lng=-0.1276').then(r => r.json());
+        document.querySelector('#crime-card .value').textContent = police.length;
+      } catch (e) {
+        document.querySelector('#crime-card .value').textContent = 'Error';
+      }
+
+      try {
+        const postcode = await fetch('https://api.postcodes.io/postcodes/SW1A2AA').then(r => r.json());
+        document.querySelector('#postcode-card .value').textContent = postcode.result.admin_district;
+      } catch (e) {
+        document.querySelector('#postcode-card .value').textContent = 'Error';
+      }
+
+      try {
+        const holidays = await fetch('https://www.gov.uk/bank-holidays.json').then(r => r.json());
+        const next = holidays['england-and-wales'].events[0];
+        document.querySelector('#holiday-card .value').textContent = next.title;
+        document.querySelector('#holiday-card .small').textContent = next.date;
+      } catch (e) {
+        document.querySelector('#holiday-card .value').textContent = 'Error';
+      }
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>
